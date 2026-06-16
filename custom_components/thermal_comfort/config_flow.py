@@ -364,7 +364,7 @@ def build_schema(
         registry, hass, SensorDeviceClass.TEMPERATURE, show_advanced
     )
     pressure_sensors = get_sensors_by_device_class(
-        registry, hass, SensorDeviceClass.PRESSURE, show_advanced
+        registry, hass, SensorDeviceClass.PRESSURE
     )
 
     if not temperature_sensors or not humidity_sensors:
