@@ -20,8 +20,7 @@
   "config": {
     "abort": {
       "already_configured": "この温度センサーと湿度センサーの組み合わせは既に構成されています",
-      "no_sensors": "温度または湿度センサーが見つかりません。詳細モードで再試行してください。",
-      "no_sensors_advanced": "温度または湿度センサーが見つかりません。"
+      "no_sensors": "温度または湿度センサーが見つかりません。"
     },
     "error": {
       "temperature_not_found": "温度センサーが見つかりません",

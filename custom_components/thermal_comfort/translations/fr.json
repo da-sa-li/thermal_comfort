@@ -20,8 +20,7 @@
   "config": {
     "abort": {
       "already_configured": "Cette combinaison de capteurs de température et d'humidité est déjà configurée",
-      "no_sensors": "Aucun capteur de température ou d'humidité n'a été trouvé. Réessayez en mode avancé.",
-      "no_sensors_advanced": "Aucun capteur de température ou d'humidité n'a été trouvé."
+      "no_sensors": "Aucun capteur de température ou d'humidité n'a été trouvé."
     },
     "error": {
       "temperature_not_found": "Capteur de température introuvable",

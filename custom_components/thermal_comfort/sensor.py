@@ -29,6 +29,7 @@ from homeassistant.const import (
     CONF_UNIQUE_ID,
     STATE_UNAVAILABLE,
     STATE_UNKNOWN,
+    UnitOfDensity,
     UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant
@@ -209,7 +210,7 @@ SENSOR_TYPES = {
     SensorType.ABSOLUTE_HUMIDITY: {
         "key": SensorType.ABSOLUTE_HUMIDITY,
         "suggested_display_precision": DISPLAY_PRECISION,
-        "native_unit_of_measurement": "g/m³",
+        "native_unit_of_measurement": UnitOfDensity.GRAMS_PER_CUBIC_METER,
         "state_class": SensorStateClass.MEASUREMENT,
         "icon": "mdi:water",
     },

@@ -20,8 +20,7 @@
   "config": {
     "abort": {
       "already_configured": "Esta combinação de sensores de humidade e temperatura já está configurada.",
-      "no_sensors": "Não foram encontrados sensores de humidade e/ou temperatura. Tente de novo no modo avançado.",
-      "no_sensors_advanced": "Não foram encontrados sensores de humidade e/ou temperatura."
+      "no_sensors": "Não foram encontrados sensores de humidade e/ou temperatura."
     },
     "error": {
       "temperature_not_found": "Sensor de temperatura não encontrado",

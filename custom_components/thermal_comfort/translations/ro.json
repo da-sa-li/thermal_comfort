@@ -20,8 +20,7 @@
   "config": {
     "abort": {
       "already_configured": "Această combinație de senzori de temperatură și umiditate este deja configurată",
-      "no_sensors": "Nu s-au găsit senzori de temperatură sau umiditate. Încercați din nou în modul avansat.",
-      "no_sensors_advanced": "Nu s-au găsit senzori de temperatură sau umiditate."
+      "no_sensors": "Nu s-au găsit senzori de temperatură sau umiditate."
     },
     "error": {
       "temperature_not_found": "Senzorul de temperatură nu a fost găsit",

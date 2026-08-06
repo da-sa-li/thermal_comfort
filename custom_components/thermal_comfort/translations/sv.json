@@ -17,8 +17,7 @@
   },
   "config": {
     "abort": {
-      "no_sensors": "Ingen temperatur eller fuktighetssensor hittad. Försök igen i avancerat läge.",
-      "no_sensors_advanced": "Ingen temperatur eller fuktighetssensor hittad."
+      "no_sensors": "Ingen temperatur eller fuktighetssensor hittad."
     },
     "error": {
       "temperature_not_found": "Temperatursensor hittat inte",

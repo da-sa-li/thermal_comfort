@@ -20,8 +20,7 @@
   "config": {
     "abort": {
       "already_configured": "Deze combinatie van temperatuur- en luchtvochtigheidssensoren is al geconfigureerd",
-      "no_sensors": "Geen temperatuur- of luchtvochtigheidssensoren gevonden. Probeer opnieuw in geadvanceerde modus.",
-      "no_sensors_advanced": "Geen temperatuur- of luchtvochtigheidssensoren gevonden."
+      "no_sensors": "Geen temperatuur- of luchtvochtigheidssensoren gevonden."
     },
     "error": {
       "temperature_not_found": "Temperatuursensor niet gevonden",
