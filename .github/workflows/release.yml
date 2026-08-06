@@ -50,6 +50,8 @@ jobs:
           # from the commits since the most recent release tag.
           fetch-depth: 0
           fetch-tags: true
+          # The version is committed back to the branch before it is tagged.
+          persist-credentials: true
 
       - name: Work out the next version
         id: version
@@ -78,14 +80,43 @@ jobs:
             cat release-notes.md
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # HACS downloads the source of the tagged commit, so the version the
+      # integration reports is whatever the manifest holds at that commit.
+      - name: Commit the version to the manifest
+        id: commit
+        if: steps.version.outputs.release == 'true' && inputs.dry_run != true
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          package=$(find custom_components -mindepth 1 -maxdepth 1 -type d \
+            -not -name '__pycache__' -printf '%f\n' | sort | head -1)
+          manifest="custom_components/${package}/manifest.json"
+          jq --arg version "${VERSION}" '.version = $version' \
+            "${manifest}" > "${manifest}.new"
+          mv "${manifest}.new" "${manifest}"
+          git config user.name "github-actions[bot]"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- "${manifest}"; then
+            echo "The manifest already declares ${VERSION}."
+          else
+            git add "${manifest}"
+            git commit -m "chore(release): ${TAG}"
+            # Pushed with GITHUB_TOKEN, which does not start another run.
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
       - name: Create the release
         if: steps.version.outputs.release == 'true' && inputs.dry_run != true
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
+          TARGET: ${{ steps.commit.outputs.sha }}
         run: |
           gh release create "$TAG" \
-            --target "$GITHUB_SHA" \
+            --target "$TARGET" \
             --title "$TAG" \
             --notes-file release-notes.md
 

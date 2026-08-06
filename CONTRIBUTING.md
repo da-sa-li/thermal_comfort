@@ -58,15 +58,20 @@ the commits they bring in are the ones that count.
 
 ## Releases
 Pushing to `master` runs the [release workflow](.github/workflows/release.yml), which reads the
-commits since the most recent release tag, works out the next version, and publishes a GitHub
-release with the integration archive attached. It does nothing when there is nothing to release.
+commits since the most recent release tag and works out the next version. It then writes that
+version into `manifest.json`, commits it, tags that commit and publishes a GitHub release with the
+integration archive attached. It does nothing when there is nothing to release.
+
+The version has to be committed because `hacs.json` does not set `zip_release`, so HACS downloads
+the source of the tagged commit. The version the integration reports to Home Assistant is the one
+the manifest holds at that commit, not the name of the tag.
 
 The workflow can also be started by hand from the Actions tab, where you can override the version
 part to bump or do a dry run that only reports the version it would pick.
 
-The repository needs one release tag to count from. If there is none yet, either push the baseline
-tag (`git tag v2.2.0 && git push origin v2.2.0`) or run the workflow by hand once with an initial
-version.
+The version is counted from the most recent release tag. Until there is one, the version in
+`manifest.json` is the baseline instead, so no manual setup is needed. Push a baseline tag
+(`git tag v2.3.0 && git push origin v2.3.0`) if you want to release from somewhere else.
 
 ## Contributor Credits
 You can add yourself to [CREDITS.md](CREDITS.md) in your PR. Otherwise you will be added before our next release.
