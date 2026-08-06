@@ -15,6 +15,7 @@ Merge commits are ignored, the commits they bring in are classified instead.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 from pathlib import Path
 import re
@@ -63,6 +64,19 @@ def previous_tag() -> str | None:
     """Return the most recent release tag reachable from HEAD."""
     tags = git("tag", "--list", "--merged", "HEAD", "--sort=-v:refname").split()
     return next((tag for tag in tags if VERSION_TAG.match(tag)), None)
+
+
+def manifest_path() -> Path | None:
+    """Return the path of the integration manifest."""
+    return next(iter(sorted(Path("custom_components").glob("*/manifest.json"))), None)
+
+
+def manifest_version() -> str | None:
+    """Return the version the integration manifest declares, if it is usable."""
+    if (path := manifest_path()) is None:
+        return None
+    version = json.loads(path.read_text(encoding="utf-8")).get("version", "")
+    return version if VERSION_TAG.match(version) else None
 
 
 def commits(since: str | None) -> list[tuple[str, str, str]]:
@@ -158,7 +172,8 @@ def main() -> int:
     )
     parser.add_argument(
         "--initial-version",
-        help="version to release when the repository has no release tag yet",
+        help="version to release when there is neither a release tag nor a "
+        "version in the integration manifest",
     )
     parser.add_argument(
         "--notes-file",
@@ -180,12 +195,17 @@ def main() -> int:
         section, description = classify(subject, body)
         grouped.setdefault(section, []).append((sha, description))
 
-    if previous is None:
+    # Without a release tag the version the integration declares is the
+    # baseline, it is what a HACS download currently reports.
+    baseline = previous or manifest_version()
+
+    if baseline is None:
         if not args.initial_version:
             print(
-                "The repository has no release tag yet, so there is no version to "
-                "bump. Run this workflow manually with an initial version, or push "
-                "the baseline tag yourself, for example `git tag v2.2.0`.",
+                "The repository has no release tag and the manifest declares no "
+                "version, so there is nothing to bump. Run this workflow manually "
+                "with an initial version, or push the baseline tag yourself, for "
+                "example `git tag v2.3.0`.",
                 file=sys.stderr,
             )
             write_output(release="false")
@@ -200,7 +220,7 @@ def main() -> int:
         version = args.initial_version.lstrip("v")
     else:
         bump = args.bump if args.bump != "auto" else bump_for(set(grouped))
-        version = apply_bump(previous.lstrip("v"), bump)
+        version = apply_bump(baseline.lstrip("v"), bump)
 
     tag = f"v{version}"
     Path(args.notes_file).write_text(
@@ -213,6 +233,7 @@ def main() -> int:
         tag=tag,
         bump=bump,
         previous_tag=previous or "",
+        baseline=baseline or "",
         commits=str(len(history)),
         notes_file=args.notes_file,
     )
