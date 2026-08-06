@@ -20,8 +20,7 @@
   "config": {
     "abort": {
       "already_configured": "Annettu anturiyhdistelmä on jo määritetty.",
-      "no_sensors": "Lämpötila- tai kosteusanturia ei löydetty. Kokeile uudestaan kehittynyt-tilassa.",
-      "no_sensors_advanced": "Lämpötila- tai kosteusanturia ei löydetty."
+      "no_sensors": "Lämpötila- tai kosteusanturia ei löydetty."
     },
     "error": {
       "temperature_not_found": "Lämpötila-anturia ei löydetty",

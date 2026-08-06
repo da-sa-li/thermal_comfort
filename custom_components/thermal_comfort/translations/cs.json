@@ -20,8 +20,7 @@
   "config": {
     "abort": {
       "already_configured": "Tato kombinace snímačů teploty a vlhkosti je již nakonfigurována",
-      "no_sensors": "Nebyla nalezena žádná čidla teploty nebo vlhkosti. Zkuste to znovu v pokročilém režimu.",
-      "no_sensors_advanced": "Nebyla nalezena žádná čidla teploty nebo vlhkosti."
+      "no_sensors": "Nebyla nalezena žádná čidla teploty nebo vlhkosti."
     },
     "error": {
       "temperature_not_found": "Snímač teploty nenalezen",

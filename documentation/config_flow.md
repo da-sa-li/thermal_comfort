@@ -13,11 +13,9 @@
 
 ## Name your virtual device and select the temperature and humidity sensor you want to use
 
-*Note: Enable [advanced mode](https://www.home-assistant.io/blog/2019/07/17/release-96/#advanced-mode)
-in your user profile if you want additional options.
-We filter the sensors to include only those who have the correct device class.
-If you want to select other make sure to enable
-[advanced mode](https://www.home-assistant.io/blog/2019/07/17/release-96/#advanced-mode)*
+*Note: Sensors carrying the matching device class are listed first, followed by
+any other entity which could plausibly hold a temperature or humidity value, so
+sensors without a device class can be selected as well.*
 
 ![Config Thermal Comfort](https://raw.githubusercontent.com/dolezsa/thermal_comfort/master/screenshots/config_thermal_comfort.png)
 

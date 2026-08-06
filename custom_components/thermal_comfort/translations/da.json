@@ -20,8 +20,7 @@
   "config": {
     "abort": {
       "already_configured": "Denne kombination af temperatur og fugtighedssensorer er allerede konfigureret",
-      "no_sensors": "Ingen temperatur eller fugtighedssensorer fundet. Prøv igen i avanceret tilstand.",
-      "no_sensors_advanced": "Ingen temperatur eller fugtighedssensorer fundet."
+      "no_sensors": "Ingen temperatur eller fugtighedssensorer fundet."
     },
     "error": {
       "temperature_not_found": "Temperatursensor ikke fundet",

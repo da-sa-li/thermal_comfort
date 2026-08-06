@@ -34,9 +34,15 @@ def get_sensors_by_device_class(
     _er: EntityRegistry,
     _hass: HomeAssistant,
     device_class: SensorDeviceClass,
-    include_all: bool = False,
 ) -> list:
-    """Get sensors of required class from entity registry."""
+    """Get sensors of required class from entity registry.
+
+    Entities carrying the requested device class come first, followed by any
+    other entity which could plausibly hold such a value. Home Assistant no
+    longer lets integrations distinguish advanced users in a data entry flow,
+    so the wider list is offered to everyone, otherwise sensors without a
+    device class would not be selectable at all.
+    """
 
     def filter_by_device_class(
         _state: State, _list: list[SensorDeviceClass], should_be_in: bool = True
@@ -302,16 +308,15 @@ def get_sensors_by_device_class(
     result.sort()
     _LOGGER.debug("Results for %s based on device class: %s", device_class, result)
 
-    if include_all:
-        additional_sensors = _hass.states.async_all()
-        for f in filters_for_additional_sensors:
-            additional_sensors = list(filter(f, additional_sensors))
+    additional_sensors = _hass.states.async_all()
+    for f in filters_for_additional_sensors:
+        additional_sensors = list(filter(f, additional_sensors))
 
-        additional_entity_ids = [state.entity_id for state in additional_sensors]
-        additional_entity_ids = list(set(additional_entity_ids) - set(result))
-        additional_entity_ids.sort()
-        _LOGGER.debug("Additional results: %s", additional_entity_ids)
-        result += additional_entity_ids
+    additional_entity_ids = [state.entity_id for state in additional_sensors]
+    additional_entity_ids = list(set(additional_entity_ids) - set(result))
+    additional_entity_ids.sort()
+    _LOGGER.debug("Additional results: %s", additional_entity_ids)
+    result += additional_entity_ids
 
     result = list(
         filter(
@@ -344,23 +349,21 @@ def get_value(
 def build_schema(
     config_entry: config_entries | None,
     hass: HomeAssistant,
-    show_advanced: bool = False,
     step: str = "user",
 ) -> vol.Schema:
     """Build configuration schema.
 
     :param config_entry: config entry for getting current parameters on None
     :param hass: Home Assistant instance
-    :param show_advanced: bool: should we show advanced options?
     :param step: for which step we should build schema
     :return: Configuration schema with default parameters
     """
     registry = er.async_get(hass)
     humidity_sensors = get_sensors_by_device_class(
-        registry, hass, SensorDeviceClass.HUMIDITY, show_advanced
+        registry, hass, SensorDeviceClass.HUMIDITY
     )
     temperature_sensors = get_sensors_by_device_class(
-        registry, hass, SensorDeviceClass.TEMPERATURE, show_advanced
+        registry, hass, SensorDeviceClass.TEMPERATURE
     )
 
     if not temperature_sensors or not humidity_sensors:
@@ -397,38 +400,34 @@ def build_schema(
             ),
         },
     )
-    if show_advanced:
+    schema = schema.extend(
+        {
+            vol.Optional(
+                CONF_POLL, default=get_value(config_entry, CONF_POLL, POLL_DEFAULT)
+            ): bool,
+            vol.Optional(
+                CONF_SCAN_INTERVAL,
+                default=get_value(
+                    config_entry, CONF_SCAN_INTERVAL, SCAN_INTERVAL_DEFAULT
+                ),
+            ): vol.All(vol.Coerce(int), vol.Range(min=1)),
+            vol.Optional(
+                CONF_CUSTOM_ICONS,
+                default=get_value(config_entry, CONF_CUSTOM_ICONS, False),
+            ): bool,
+        }
+    )
+    if step == "user":
         schema = schema.extend(
             {
                 vol.Optional(
-                    CONF_POLL, default=get_value(config_entry, CONF_POLL, POLL_DEFAULT)
-                ): bool,
-                vol.Optional(
-                    CONF_SCAN_INTERVAL,
-                    default=get_value(
-                        config_entry, CONF_SCAN_INTERVAL, SCAN_INTERVAL_DEFAULT
-                    ),
-                ): vol.All(vol.Coerce(int), vol.Range(min=1)),
-                vol.Optional(
-                    CONF_CUSTOM_ICONS,
-                    default=get_value(config_entry, CONF_CUSTOM_ICONS, False),
-                ): bool,
+                    CONF_ENABLED_SENSORS,
+                    default=list(SensorType),
+                ): cv.multi_select(
+                    {sensor_type: sensor_type.to_name() for sensor_type in SensorType}
+                ),
             }
         )
-        if step == "user":
-            schema = schema.extend(
-                {
-                    vol.Optional(
-                        CONF_ENABLED_SENSORS,
-                        default=list(SensorType),
-                    ): cv.multi_select(
-                        {
-                            sensor_type: sensor_type.to_name()
-                            for sensor_type in SensorType
-                        }
-                    ),
-                }
-            )
 
     return schema
 
@@ -499,15 +498,10 @@ class ThermalComfortConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         schema = build_schema(
             config_entry=None,
             hass=self.hass,
-            show_advanced=self.show_advanced_options,
         )
 
         if schema is None:
-            if self.show_advanced_options:
-                reason = "no_sensors_advanced"
-            else:
-                reason = "no_sensors"
-            return self.async_abort(reason=reason)
+            return self.async_abort(reason="no_sensors")
 
         return self.async_show_form(
             step_id="user",
@@ -533,7 +527,6 @@ class ThermalComfortOptionsFlow(config_entries.OptionsFlow):
             data_schema=build_schema(
                 config_entry=self.config_entry,
                 hass=self.hass,
-                show_advanced=self.show_advanced_options,
                 step="init",
             ),
             errors=errors,
