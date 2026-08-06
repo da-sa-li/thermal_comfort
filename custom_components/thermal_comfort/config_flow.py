@@ -7,7 +7,7 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.components.sensor import SensorDeviceClass
-from homeassistant.const import CONF_NAME, Platform
+from homeassistant.const import CONF_NAME, Platform, UnitOfDensity, UnitOfRatio
 from homeassistant.core import HomeAssistant, State, callback
 from homeassistant.helpers import entity_registry as er
 import homeassistant.helpers.config_validation as cv
@@ -225,12 +225,16 @@ def get_sensors_by_device_class(
             "in",
             "in/h",
             # Concentration units
+            UnitOfDensity.MICROGRAMS_PER_CUBIC_METER,
+            UnitOfDensity.MILLIGRAMS_PER_CUBIC_METER,
+            UnitOfDensity.MICROGRAMS_PER_CUBIC_FOOT,
+            # The unit enumerators spell micro as U+03BC while the constants
+            # they replace used U+00B5, entities report either of them.
             "µg/m³",
-            "mg/m³",
-            "μg/ft³",
+            "µg/ft³",
             "p/m³",
-            "ppm",
-            "ppb",
+            UnitOfRatio.PARTS_PER_MILLION,
+            UnitOfRatio.PARTS_PER_BILLION,
             # Speed units
             "mm/d",
             "in/d",
