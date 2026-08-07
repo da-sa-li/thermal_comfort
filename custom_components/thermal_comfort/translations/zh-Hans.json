@@ -20,8 +20,7 @@
   "config": {
     "abort": {
       "already_configured": "此温度和湿度传感器组合已配置",
-      "no_sensors": "未找到温度或湿度传感器。请在高级模式下重试。",
-      "no_sensors_advanced": "未找到温度或湿度传感器。"
+      "no_sensors": "未找到温度或湿度传感器。"
     },
     "error": {
       "temperature_not_found": "未找到温度传感器",

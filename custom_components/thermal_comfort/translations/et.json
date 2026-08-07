@@ -20,8 +20,7 @@
   "config": {
     "abort": {
       "already_configured": "See temperatuuri- ja niiskusandurite kombinatsioon on juba seadistatud",
-      "no_sensors": "Temperatuuri- ega niiskusandureid ei leitud. Proovi uuesti täiustatud režiimis.",
-      "no_sensors_advanced": "Temperatuuri- ega niiskusandureid ei leitud."
+      "no_sensors": "Temperatuuri- ega niiskusandureid ei leitud."
     },
     "error": {
       "temperature_not_found": "Temperatuuriandurit ei leitud",

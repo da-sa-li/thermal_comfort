@@ -20,8 +20,7 @@
   "config": {
     "abort": {
       "already_configured": "Ta kombinacja czujników temperatury i wilgotności jest już skonfigurowana",
-      "no_sensors": "Nie znaleziono czujników temperatury ani wilgotności. Spróbuj ponownie w trybie zaawansowanym.",
-      "no_sensors_advanced": "Nie znaleziono czujników temperatury ani wilgotności."
+      "no_sensors": "Nie znaleziono czujników temperatury ani wilgotności."
     },
     "error": {
       "temperature_not_found": "Nie znaleziono czujnika temperatury",
