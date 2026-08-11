@@ -43,6 +43,11 @@
     }
   },
   "entity": {
+    "image": {
+      "psychrometric_chart": {
+        "name": "Psychrometrisches Diagramm"
+      }
+    },
     "sensor": {
       "absolute_humidity": {
         "name": "Absolute Luftfeuchtigkeit"

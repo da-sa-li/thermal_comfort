@@ -108,6 +108,7 @@ def get_sensors_by_device_class(
             Platform.DEVICE_TRACKER,
             Platform.FAN,
             Platform.GEO_LOCATION,
+            Platform.IMAGE,
             Platform.IMAGE_PROCESSING,
             Platform.LIGHT,
             Platform.LOCK,

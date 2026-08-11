@@ -76,3 +76,9 @@ thermal_comfort:
     sensor you would get `0ee4d8a7-c610-4afa-855d-0b2c2c265e11absolute_humidity`.
   </dd>
 </dl>
+
+## Psychrometric Chart
+
+A psychrometric chart of the same air can be configured in an `image` section.
+See the [psychrometric chart documentation](https://github.com/dolezsa/thermal_comfort/blob/master/documentation/psychrometric_chart.md)
+for the configuration variables and for the ways to put it on a dashboard.

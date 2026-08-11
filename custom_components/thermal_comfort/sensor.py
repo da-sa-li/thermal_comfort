@@ -6,7 +6,7 @@ from enum import StrEnum
 from functools import wraps
 import logging
 import math
-from typing import Any, Self
+from typing import Any, NamedTuple, Self
 
 import voluptuous as vol
 
@@ -31,7 +31,7 @@ from homeassistant.const import (
     STATE_UNKNOWN,
     UnitOfTemperature,
 )
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, State
 from homeassistant.exceptions import TemplateError
 from homeassistant.helpers import entity_registry as er
 import homeassistant.helpers.config_validation as cv
@@ -45,6 +45,7 @@ from homeassistant.helpers.template import Template
 from homeassistant.loader import async_get_custom_components
 from homeassistant.util.unit_conversion import TemperatureConverter
 
+from . import psychrometrics
 from .const import DEFAULT_NAME, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -332,6 +333,48 @@ SENSOR_SCHEMA = vol.Schema(
         vol.Required(CONF_UNIQUE_ID): cv.string,
     }
 ).extend(SENSOR_OPTIONS_SCHEMA.schema)
+
+
+class TemperatureReading(NamedTuple):
+    """A temperature taken from a source entity, in its own unit and in °C."""
+
+    native: float
+    celsius: float
+
+
+def temperature_from_state(
+    hass: HomeAssistant, state: State | None
+) -> TemperatureReading | None:
+    """Read a temperature from a source entity state.
+
+    :param hass: Home Assistant instance, used for the fallback unit
+    :param state: state of the temperature source entity
+    :returns: the reading, or None if the state can not be used for calculations
+    """
+    if not _is_valid_state(state):
+        return None
+    unit = state.attributes.get(
+        ATTR_UNIT_OF_MEASUREMENT, hass.config.units.temperature_unit
+    )
+    native = util.convert(state.state, float)
+    celsius = TemperatureConverter.convert(native, unit, UnitOfTemperature.CELSIUS)
+    if not -89.2 <= celsius <= 56.7:
+        return None
+    return TemperatureReading(native, celsius)
+
+
+def humidity_from_state(state: State | None) -> float | None:
+    """Read a relative humidity in % from a source entity state.
+
+    :param state: state of the humidity source entity
+    :returns: the relative humidity, or None if the state can not be used
+    """
+    if not _is_valid_state(state):
+        return None
+    humidity = float(state.state)
+    if not 0 < humidity <= 100:
+        return None
+    return humidity
 
 
 def compute_once_lock(sensor_type):
@@ -648,17 +691,11 @@ class DeviceThermalComfort:
         await self._new_temperature_state(event.data.get("new_state"))
 
     async def _new_temperature_state(self, state):
-        if _is_valid_state(state):
-            hass = self.hass
-            unit = state.attributes.get(ATTR_UNIT_OF_MEASUREMENT, hass.config.units.temperature_unit)
-            temp = util.convert(state.state, float)
-            # convert to celsius if necessary
-            temperature = TemperatureConverter.convert(temp, unit, UnitOfTemperature.CELSIUS)
-            if -89.2 <= temperature <= 56.7:
-                self.extra_state_attributes[ATTR_TEMPERATURE] = temp
-                self._temperature = temperature
-                await self.async_update()
-        else:
+        if (reading := temperature_from_state(self.hass, state)) is not None:
+            self.extra_state_attributes[ATTR_TEMPERATURE] = reading.native
+            self._temperature = reading.celsius
+            await self.async_update()
+        elif not _is_valid_state(state):
             _LOGGER.info("Temperature has an invalid value: %s. Can't calculate new states.", state)
 
     async def humidity_state_listener(self, event):
@@ -666,13 +703,11 @@ class DeviceThermalComfort:
         await self._new_humidity_state(event.data.get("new_state"))
 
     async def _new_humidity_state(self, state):
-        if _is_valid_state(state):
-            humidity = float(state.state)
-            if 0 < humidity <= 100:
-                self._humidity = float(state.state)
-                self.extra_state_attributes[ATTR_HUMIDITY] = self._humidity
-                await self.async_update()
-        else:
+        if (humidity := humidity_from_state(state)) is not None:
+            self._humidity = humidity
+            self.extra_state_attributes[ATTR_HUMIDITY] = self._humidity
+            await self.async_update()
+        elif not _is_valid_state(state):
             _LOGGER.info("Relative humidity has an invalid value: %s. Can't calculate new states.", state)
 
     @compute_once_lock(SensorType.DEW_POINT)
@@ -917,43 +952,10 @@ class DeviceThermalComfort:
     @compute_once_lock(SensorType.MOIST_AIR_ENTHALPY)
     async def moist_air_enthalpy(self) -> float:
         """Calculate the enthalpy of moist air."""
-        patm = 101325  # standard pressure at sea-level
-        c_to_k = 273.15
-
-        # ASHRAE fundamentals 2021 pg 1.5
-        c1 = -5.6745359e03
-        c2 = 6.3925247e00
-        c3 = -9.6778430e-03
-        c4 = 6.2215701e-07
-        c5 = 2.0747825e-09
-        c6 = -9.4840240e-13
-        c7 = 4.1635019e00
-        c8 = -5.8002206e03
-        c9 = 1.3914993e00
-        c10 = -4.8640239e-02
-        c11 = 4.1764768e-05
-        c12 = -1.4452093e-08
-        c13 = 6.5459673e00
-
-        T = self._temperature + c_to_k
-
-        # calculate saturation vapor pressure for temperature
-        p_ws = (
-            # ASHRAE fundamentals 2021 pg 1.5 eq 5
-            math.exp(c1 / T + c2 + c3 * T + c4 * T**2 + c5 * T**3 + c6 * T**4 + c7 * math.log(T))
-            if T < c_to_k  # noqa: SIM300
-            # ASHRAE fundamentals 2021 pg 1.5 eq 6
-            else math.exp(c8 / T + c9 + c10 * T + c11 * T**2 + c12 * T**3 + c13 * math.log(T))
+        return psychrometrics.moist_air_enthalpy(
+            self._temperature,
+            psychrometrics.humidity_ratio(self._temperature, self._humidity),
         )
-
-        # calculate vapor pressure for RH % (ASHRAE fundamentals 2021 pg 1.9 eq 22)
-        p_w = self._humidity / 100 * p_ws
-
-        # calculate humidity ratio (ASHRAE fundamentals 2021 pg 1.9 eq 20)
-        W = 0.621945 * p_w / (patm - p_w)
-
-        # calculate enthalpy (ASHRAE fundamentals 2021 pg 1.10 eq 30)
-        return 1.006 * self._temperature + W * (2501 + 1.86 * self._temperature)
 
     @compute_once_lock(SensorType.THOMS_DISCOMFORT_PERCEPTION)
     async def thoms_discomfort_perception(self) -> (ThomsDiscomfortPerception, dict):

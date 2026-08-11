@@ -43,6 +43,11 @@
     }
   },
   "entity": {
+    "image": {
+      "psychrometric_chart": {
+        "name": "Psychrometric chart"
+      }
+    },
     "sensor": {
       "absolute_humidity": {
         "name": "Absolute humidity"

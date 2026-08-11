@@ -9,6 +9,7 @@ import logging
 
 import voluptuous as vol
 
+from homeassistant.components.image import DOMAIN as IMAGE_DOMAIN
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME, SERVICE_RELOAD
@@ -25,6 +26,7 @@ from homeassistant.helpers.typing import ConfigType
 
 from .config_flow import get_value
 from .const import DOMAIN, PLATFORMS, UPDATE_LISTENER
+from .image import IMAGE_SCHEMA
 from .sensor import (
     CONF_CUSTOM_ICONS,
     CONF_ENABLED_SENSORS,
@@ -119,6 +121,9 @@ COMBINED_SCHEMA = vol.Schema(
     {
         vol.Optional(SENSOR_DOMAIN): vol.All(
             cv.ensure_list, [SENSOR_SCHEMA]
+        ),
+        vol.Optional(IMAGE_DOMAIN): vol.All(
+            cv.ensure_list, [IMAGE_SCHEMA]
         ),
     }
 ).extend(OPTIONS_SCHEMA.schema)

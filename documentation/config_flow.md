@@ -44,3 +44,10 @@ If you want to select other make sure to enable
     installed and want to use it as default icons for the sensors
   </dd>
 </dl>
+
+# Psychrometric Chart
+
+Next to the sensors your virtual device gets a psychrometric chart of the air,
+e.g. `image.living_room_psychrometric_chart`. See the
+[psychrometric chart documentation](https://github.com/dolezsa/thermal_comfort/blob/master/documentation/psychrometric_chart.md)
+for the ways to put it on a dashboard.
