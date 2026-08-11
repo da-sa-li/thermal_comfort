@@ -29,7 +29,7 @@ from custom_components.thermal_comfort.sensor import (
 )
 from homeassistant.components.command_line.const import DOMAIN as COMMAND_LINE_DOMAIN
 from homeassistant.components.sensor import DOMAIN as PLATFORM_DOMAIN
-from homeassistant.const import ATTR_TEMPERATURE
+from homeassistant.const import ATTR_TEMPERATURE, ATTR_UNIT_OF_MEASUREMENT
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 
@@ -447,6 +447,31 @@ async def test_summer_simmer_perception(hass, start_ha):
         get_sensor(hass, SensorType.SUMMER_SIMMER_PERCEPTION).state
         == SummerSimmerPerception.DANGER_OF_HEATSTROKE
     )
+
+
+@pytest.mark.parametrize(*DEFAULT_TEST_SENSORS)
+async def test_unsupported_temperature_unit(hass, start_ha):
+    """Test that a source with a unit we can not convert keeps the last value.
+
+    Advanced mode lets any entity be picked as a source, and an entity that
+    declares no unit at all reports None instead of falling back to the system
+    unit, so the conversion can be asked for a unit it does not know.
+    """
+    assert get_sensor(hass, SensorType.DEW_POINT).state == "13.8753224672013"
+
+    for unit in (None, "lx", "%"):
+        hass.states.async_set(
+            "sensor.test_temperature_sensor", "25.0", {ATTR_UNIT_OF_MEASUREMENT: unit}
+        )
+        await hass.async_block_till_done()
+        assert get_sensor(hass, SensorType.DEW_POINT).state == "13.8753224672013"
+
+    # A source that starts reporting a usable unit again is picked up.
+    hass.states.async_set(
+        "sensor.test_temperature_sensor", "15.0", {ATTR_UNIT_OF_MEASUREMENT: "°C"}
+    )
+    await hass.async_block_till_done()
+    assert get_sensor(hass, SensorType.DEW_POINT).state == "4.67503901377299"
 
 
 @pytest.mark.parametrize(*DEFAULT_TEST_SENSORS)

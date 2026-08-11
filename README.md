@@ -23,11 +23,12 @@ Thermal Comfort also provides a variety of bio indices like `humidex` or `heat i
 
 ## Psychrometric Chart
 
-Every virtual device also gets a psychrometric chart of the air it is watching,
-showing the saturation curve, constant relative humidity curves and the current
-state of the air. It is drawn as an SVG image entity, so it needs no additional
-frontend resources and can be placed on a dashboard with the built in picture
-card.
+Virtual devices configured through the user interface also get a psychrometric
+chart of the air they are watching, showing the saturation curve, constant
+relative humidity curves and the current state of the air. With yaml the chart
+is opt in through an `image` section. It is drawn as an SVG image entity, so it
+needs no additional frontend resources and can be placed on a dashboard with the
+built-in picture card.
 
 ![Psychrometric Chart](https://raw.githubusercontent.com/dolezsa/thermal_comfort/master/screenshots/psychrometric_chart.png)
 

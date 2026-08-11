@@ -32,7 +32,7 @@ from homeassistant.const import (
     UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant, State
-from homeassistant.exceptions import TemplateError
+from homeassistant.exceptions import HomeAssistantError, TemplateError
 from homeassistant.helpers import entity_registry as er
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import DeviceInfo
@@ -357,7 +357,17 @@ def temperature_from_state(
         ATTR_UNIT_OF_MEASUREMENT, hass.config.units.temperature_unit
     )
     native = util.convert(state.state, float)
-    celsius = TemperatureConverter.convert(native, unit, UnitOfTemperature.CELSIUS)
+    try:
+        celsius = TemperatureConverter.convert(native, unit, UnitOfTemperature.CELSIUS)
+    except HomeAssistantError:
+        # Sources can be picked in advanced mode without being a temperature
+        # sensor, and a source that declares no unit at all reports None here.
+        _LOGGER.info(
+            "Temperature source %s has the unsupported unit %s. Can't calculate new states.",
+            state.entity_id,
+            unit,
+        )
+        return None
     if not -89.2 <= celsius <= 56.7:
         return None
     return TemperatureReading(native, celsius)

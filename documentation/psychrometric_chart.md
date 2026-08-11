@@ -2,8 +2,8 @@
 
 Thermal Comfort draws a psychrometric chart of the air your virtual device is
 watching. A psychrometric chart is the standard way to look at moist air: it
-puts the dry-bulb temperature on the x axis and the humidity ratio (how many
-grams of water each kilogram of dry air carries) on the y axis.
+puts the dry-bulb temperature on the x-axis and the humidity ratio (how many
+grams of water each kilogram of dry air carries) on the y-axis.
 
 ![Psychrometric Chart](https://raw.githubusercontent.com/dolezsa/thermal_comfort/master/screenshots/psychrometric_chart.png)
 
@@ -24,10 +24,13 @@ moves around.
 
 ## The Entity
 
-Every Thermal Comfort device gets one image entity, for example
-`image.living_room_psychrometric_chart`. It is drawn as an SVG, so it stays
-sharp at any size, and it follows the light or dark color scheme of your
-browser.
+A device configured through the user interface gets its chart automatically, as
+one image entity, for example `image.living_room_psychrometric_chart`. With yaml
+the chart is opt in: it is only created for `thermal_comfort` entries that carry
+an [`image` section](#yaml-configuration).
+
+The chart is drawn as an SVG, so it stays sharp at any size, and it follows the
+light or dark color scheme of your browser.
 
 The state of an image entity is the timestamp of the last change, which is why
 you normally want to hide the state when you place it on a dashboard.

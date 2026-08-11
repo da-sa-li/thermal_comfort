@@ -16,6 +16,7 @@ from homeassistant.components.image import (
     valid_image_content_type,
 )
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
+from homeassistant.const import ATTR_UNIT_OF_MEASUREMENT
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_component import DATA_INSTANCES
@@ -163,6 +164,19 @@ async def test_chart_ignores_unusable_source_states(hass, start_ha):
         hass.states.async_set("sensor.test_humidity_sensor", value)
         await hass.async_block_till_done()
         assert "50.0 %" in await get_chart(hass)
+
+
+@pytest.mark.parametrize(*DEFAULT_TEST_IMAGE)
+async def test_chart_ignores_unsupported_temperature_unit(hass, start_ha):
+    """Test that a source unit we can not convert does not break the chart."""
+    for unit in (None, "lx", "%"):
+        hass.states.async_set(
+            "sensor.test_temperature_sensor", "30.0", {ATTR_UNIT_OF_MEASUREMENT: unit}
+        )
+        await hass.async_block_till_done()
+        chart = await get_chart(hass)
+        assert parse_svg(chart) is not None
+        assert "25.0 °C" in chart
 
 
 MISSING_SOURCES_TEST_IMAGE = [
