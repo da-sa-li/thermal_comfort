@@ -28,6 +28,9 @@
 [<img src="https://github.com/ejpenney.png" style="margin: 0.2em; vertical-align: middle; border-radius: 50%; border: solid 0.1px grey;" width="24"/> @ejpenney](https://github.com/ejpenney)
 * Fix deprecated converter
 
+[Federico Tartarini](https://github.com/FedericoTartarini)
+* Original moist air enthalpy implementation, (c) 2019-2020. See LICENSE.
+
 
 # Translators 
 

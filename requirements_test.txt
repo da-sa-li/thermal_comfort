@@ -1,2 +1,10 @@
 # Strictly for tests
-pytest-homeassistant-custom-component>=0.13.52
+# Pinned: the version determines which Home Assistant is tested against.
+# 0.13.316 -> homeassistant 2026.2.3, requires Python >= 3.13.
+# Keep in sync with the python-version matrix in .github/workflows/pytest.yml.
+pytest-homeassistant-custom-component==0.13.316
+
+# Requirement of the built-in command_line integration, which the test fixtures
+# use to provide the source temperature/humidity sensors. Integration
+# requirements are not installed automatically in the test harness.
+jsonpath==0.82.2
