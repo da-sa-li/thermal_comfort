@@ -17,3 +17,8 @@ jobs:
         uses: "hacs/action@main"
         with:
           category: "integration"
+          # This repository is a fork and is not published to HACS itself, so the
+          # checks that validate repository properties rather than the integration
+          # do not apply: forks inherit no topics, have issues disabled, and get
+          # their license detected from the upstream default branch.
+          ignore: "topics issues license"
